@@ -38,6 +38,7 @@ dependencies:
   hive: ^2.2.3
   just_audio_background: ^0.0.1-beta.11
   hive_flutter: ^1.1.0
+  google_fonts: ^6.1.0
 
 dev_dependencies:
   flutter_test:
