@@ -194,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class TaskItem extends StatelessWidget {
+class TaskItem extends StatefulWidget {
   const TaskItem({
     super.key,
     required this.task,
@@ -203,20 +203,72 @@ class TaskItem extends StatelessWidget {
   final TaskEntity task;
 
   @override
+  State<TaskItem> createState() => _TaskItemState();
+}
+
+class _TaskItemState extends State<TaskItem> {
+  @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
-    return Container(
-      height: 84,
-      decoration: BoxDecoration(
+    return InkWell(
+      onTap: () {
+        setState(() {
+          widget.task.isCompleted = !widget.task.isCompleted;
+        });
+      },
+      child: Container(
+        height: 84,
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        margin: const EdgeInsets.only(top: 8),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: themeData.colorScheme.surface,
-          boxShadow: [
-            BoxShadow(blurRadius: 20, color: Colors.black.withOpacity(0.2)),
-          ]),
-      child: Text(
-        task.name,
-        style: const TextStyle(fontSize: 24),
+        ),
+        child: Row(
+          children: [
+            MycheckBox(value: widget.task.isCompleted),
+            const SizedBox(
+              width: 16,
+            ),
+            Expanded(
+              child: Text(
+                widget.task.name,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontSize: 24,
+                    decoration: widget.task.isCompleted
+                        ? TextDecoration.lineThrough
+                        : null),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class MycheckBox extends StatelessWidget {
+  final bool value;
+
+  const MycheckBox({super.key, required this.value});
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
+    return Container(
+      height: 24,
+      width: 24,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border:
+              !value ? Border.all(color: secondaryTextColor, width: 2) : null,
+          color: value ? primaryColor : null),
+      child: value
+          ? Icon(
+              CupertinoIcons.check_mark,
+              color: themeData.colorScheme.onPrimary,
+            )
+          : null,
     );
   }
 }
