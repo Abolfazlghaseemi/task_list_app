@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:task_list/data.dart';
+import 'package:task_list/edit.dart';
 
 const taskBoxName = 'tasks';
 void main() async {
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => EditTaskScreen()));
+              .push(MaterialPageRoute(builder: (context) => EditTaskScreen(task:TaskEntity(),)));
         },
         label: const Text('Add New Task'),
       ),
@@ -269,41 +270,6 @@ class MycheckBox extends StatelessWidget {
               color: themeData.colorScheme.onPrimary,
             )
           : null,
-    );
-  }
-}
-
-class EditTaskScreen extends StatelessWidget {
-  final TextEditingController _controller = TextEditingController();
-
-  EditTaskScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Task'),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          final task = TaskEntity();
-          task.name = _controller.text;
-          if (task.isInBox) {
-            task.save();
-          } else {
-            final Box<TaskEntity> box = Hive.box(taskBoxName);
-            box.add(task);
-          }
-          Navigator.of(context).pop();
-        },
-        label: const Text('Save Changes'),
-      ),
-      body: Column(children: [
-        TextField(
-          controller: _controller,
-          decoration:
-              const InputDecoration(label: Text('Add a task for todsy...')),
-        ),
-      ]),
     );
   }
 }
