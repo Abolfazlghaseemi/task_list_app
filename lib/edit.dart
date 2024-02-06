@@ -14,8 +14,8 @@ class EditTaskScreen extends StatefulWidget {
 }
 
 class _EditTaskScreenState extends State<EditTaskScreen> {
-  final TextEditingController _controller = TextEditingController();
-
+  late final TextEditingController _controller = TextEditingController(text: widget.task.name);
+ 
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -30,20 +30,20 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
-            final task = TaskEntity();
-            task.name = _controller.text;
-            task.priority =widget.task.priority; 
-            if (task.isInBox) {
-              task.save();
+            
+            widget.task.name = _controller.text;
+            widget.task.priority = widget.task.priority;
+            if (widget.task.isInBox) {
+              widget.task.save();
             } else {
               final Box<TaskEntity> box = Hive.box(taskBoxName);
-              box.add(task);
+              box.add(widget.task);
             }
 
             Navigator.of(context).pop();
           },
-          label: const Row(
-            children: [
+          label: Row(
+            children: const [
               Text('Save Changes'),
               Icon(
                 CupertinoIcons.check_mark,
@@ -97,7 +97,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                         });
                       },
                       label: 'Low',
-                      color:lowPriority,
+                      color: lowPriority,
                       isSelected: widget.task.priority == Priority.low,
                     )),
               ],
@@ -126,11 +126,12 @@ class PriorityCheckBox extends StatelessWidget {
   final bool isSelected;
   final GestureTapCallback onTap;
   const PriorityCheckBox(
-      {super.key,
+      {Key? key,
       required this.label,
       required this.color,
       required this.isSelected,
-      required this.onTap});
+      required this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
