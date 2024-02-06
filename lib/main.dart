@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:task_list/data.dart';
@@ -20,6 +21,9 @@ void main() async {
 const Color primaryColor = Color(0xff794CFF);
 const Color primaryVariantColor = Color(0xff5C0AFF);
 const secondaryTextColor = Color(0xffAFBED0);
+const normalPriority = Color(0xfff09819);
+const lowPriority = Color(0xff3BE1F1);
+const highPriority = primaryColor;
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -77,8 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => EditTaskScreen(task:TaskEntity(),)));
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => EditTaskScreen(
+                    task: TaskEntity(),
+                  )));
         },
         label: const Text('Add New Task'),
       ),
@@ -137,8 +143,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Expanded(
               child: ValueListenableBuilder<Box<TaskEntity>>(
-                  valueListenable: box.listenable(),
-                  builder: (context, box, child) {
+                valueListenable: box.listenable(),
+                builder: (context, box, child) {
+                  if (box.isNotEmpty) {
                     return ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                         itemCount: box.values.length + 1,
@@ -148,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Today',
@@ -155,26 +163,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .apply(fontSizeFactor: 0.9),
                                     ),
                                     Container(
-                                        width: 100,
-                                        height: 3,
-                                        decoration: BoxDecoration(
-                                            color: primaryColor,
-                                            borderRadius:
-                                                BorderRadius.circular(1.5)))
+                                      width: 70,
+                                      height: 3,
+                                      margin: const EdgeInsets.only(top: 4),
+                                      decoration: BoxDecoration(
+                                          color: primaryColor,
+                                          borderRadius:
+                                              BorderRadius.circular(1.5)),
+                                    )
                                   ],
                                 ),
                                 MaterialButton(
-                                  color: Color(0xffEAEFF5),
+                                  color: const Color(0xffEAEFF5),
                                   textColor: secondaryTextColor,
                                   elevation: 0,
-                                  onPressed: () {},
-                                  child: const Row(
-                                    children: [
+                                  onPressed: () {
+                                    box.clear();
+                                  },
+                                  child: Row(
+                                    children: const [
                                       Text('Delete All'),
                                       SizedBox(
                                         width: 4,
                                       ),
-                                      Icon(CupertinoIcons.delete_solid)
+                                      Icon(
+                                        CupertinoIcons.delete_solid,
+                                        size: 18,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -186,7 +201,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             return TaskItem(task: task);
                           }
                         });
-                  }),
+                  } else {
+                    return const EmptyState();
+                  }
+                },
+              ),
             ),
           ],
         ),
@@ -194,8 +213,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+class EmptyState extends StatelessWidget {
+  const EmptyState({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SvgPicture.asset(
+          'assets/empty_state.svg',
+          width: 120,
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        const Text('Your task list is empty'),
+      ],
+    );
+  }
+}
 
 class TaskItem extends StatefulWidget {
+  static const double height = 84;
+  static const double borderRadius = 8;
   const TaskItem({
     super.key,
     required this.task,
@@ -211,15 +252,31 @@ class _TaskItemState extends State<TaskItem> {
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
+    final prioritycolor;
+    switch (widget.task.priority) {
+      case Priority.low:
+        prioritycolor = lowPriority;
+        break;
+      case Priority.normal:
+        prioritycolor = normalPriority;
+        break;
+      case Priority.high:
+        prioritycolor = highPriority;
+        break;
+    }
     return InkWell(
       onTap: () {
         setState(() {
           widget.task.isCompleted = !widget.task.isCompleted;
         });
       },
+      onLongPress: () {
+        State<HomeScreen> createState() => _HomeScreenState();
+        widget.task.delete();
+      },
       child: Container(
-        height: 84,
-        padding: const EdgeInsets.only(left: 16, right: 16),
+        height: TaskItem.height,
+        padding: const EdgeInsets.only(left: 16),
         margin: const EdgeInsets.only(top: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -242,6 +299,19 @@ class _TaskItemState extends State<TaskItem> {
                         : null),
               ),
             ),
+            const SizedBox(
+              width: 8,
+            ),
+            Container(
+              width: 5,
+              height: TaskItem.height,
+              decoration: BoxDecoration(
+                color: prioritycolor,
+                borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(TaskItem.borderRadius),
+                    bottomRight: Radius.circular(TaskItem.borderRadius)),
+              ),
+            )
           ],
         ),
       ),
