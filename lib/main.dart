@@ -180,8 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   onPressed: () {
                                     box.clear();
                                   },
-                                  child: Row(
-                                    children: const [
+                                  child: const Row(
+                                    children: [
                                       Text('Delete All'),
                                       SizedBox(
                                         width: 4,
