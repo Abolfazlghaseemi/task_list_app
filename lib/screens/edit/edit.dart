@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:task_list/data.dart';
+import 'package:task_list/data/repo/repository.dart';
 import 'package:task_list/main.dart';
 
 class EditTaskScreen extends StatefulWidget {
@@ -33,17 +35,12 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
             
             widget.task.name = _controller.text;
             widget.task.priority = widget.task.priority;
-            if (widget.task.isInBox) {
-              widget.task.save();
-            } else {
-              final Box<TaskEntity> box = Hive.box(taskBoxName);
-              box.add(widget.task);
-            }
-
+            final repository=Provider.of<Repository<TaskEntity>>(context,listen: false );
+            repository.creatorUpdate(widget.task);
             Navigator.of(context).pop();
           },
-          label: Row(
-            children: const [
+          label: const Row(
+            children: [
               Text('Save Changes'),
               Icon(
                 CupertinoIcons.check_mark,

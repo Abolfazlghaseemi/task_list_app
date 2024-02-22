@@ -2,6 +2,7 @@ import 'package:hive/hive.dart';
 part 'data.g.dart';
 @HiveType(typeId: 0)
 class TaskEntity  extends HiveObject{
+  int id= -1;
   @HiveField(0)
   String name='';
   @HiveField(1)
